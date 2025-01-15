@@ -13,8 +13,6 @@ library(shinyjs)
 library(hrbrthemes)
 library(ggtext)
 
-source("R/loadData.R")
-
 # JavaScript code to handle 'Enter' key behavior
 #https://github.com/datastorm-open/shinymanager/issues/195
 js <- "
@@ -40,8 +38,8 @@ window.onload = function() {
 
 # Define credentials
 credentials <- data.frame(
-  user = c(""),
-  password = c(""),
+  user = c("user"),
+  password = c("pwd"),
   stringsAsFactors = FALSE
 )
 

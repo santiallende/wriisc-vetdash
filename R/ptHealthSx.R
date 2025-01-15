@@ -9,7 +9,7 @@ ptHealthSxUI <- function(id) {
               solidHeader = TRUE,
               fluidRow(
                 column(
-                  6,
+                  4,
                   selectInput(
                     ns("milConflictCodePtCardHealthSx"),
                     div(
@@ -29,17 +29,20 @@ ptHealthSxUI <- function(id) {
                       "Kosovo",
                       "Lebanon",
                       "ODSS",
-                      "OIF/OEF/OND",
+                      "OIF",
+                      "OEF",
+                      "OND",
                       "Other",
                       "Somalia",
                       "Vietnam",
                       "WWII"
                     ),
+                    multiple = TRUE,
                     selected = "All"
                   )
                 ),
                 column(
-                  6,
+                  4,
                   sliderInput(
                     ns("ageHealthSx"),
                     "Age Range:",
@@ -50,11 +53,21 @@ ptHealthSxUI <- function(id) {
                       max(full_demo_dat$age, na.rm = TRUE)
                     )
                   )
+                ),
+                column(
+                  4,
+                  selectizeInput(
+                    ns("filterByExpo"),
+                    "Filter by Exposures:",
+                    choices = c("None", unique(mil_expo_dat$exposureName)),
+                    multiple = TRUE,
+                    selected = "None"
+                  )
                 )
               )
             ),
             box(
-              title = "Filter Health Symptoms Table by Gender, Ethnicity, and Race",
+              title = "Filter Health Symptoms Table by Birth Sex, Ethnicity, and Race",
               width = 12,
               collapsible = TRUE,
               solidHeader = TRUE,
@@ -63,7 +76,7 @@ ptHealthSxUI <- function(id) {
                   4,
                   selectInput(
                     ns("genderHealthSx"),
-                    "Gender:",
+                    "Birth Sex:",
                     choices = c("All", "Male", "Female"),
                     selected = "All"
                   )
@@ -132,21 +145,29 @@ ptHealthSxServer <- function(id, selected_patient) {
         input$genderHealthSx,
         input$milConflictCodePtCardHealthSx,
         input$ethnicityHealthSx,
-        input$raceHealthSx
+        input$raceHealthSx,
+        input$filterByExpo
       )
       
-      conflict_filtered_ids <- 
-        if (input$milConflictCodePtCardHealthSx == "All") {
-          unique(full_demo_dat$id)  # Include all IDs if no conflict filter is applied
-        } else {
-          unique(
-            mil_conflict_dat %>%
-              filter(
-                milConflictCode == input$milConflictCodePtCardHealthSx
-              ) %>%
-              pull(id)
-          )
-        }
+      conflict_filtered_ids <- if ("All" %in% input$milConflictCodePtCardHealthSx || length(input$milConflictCodePtCardHealthSx) == 0) {
+        unique(full_demo_dat$id)  # Include all IDs if "All" is selected or no options are selected
+      } else {
+        unique(
+          mil_conflict_dat %>%
+            filter(milConflictCode %in% input$milConflictCodePtCardHealthSx) %>%
+            pull(id)
+        )
+      }
+      
+      exposure_filtered_ids <- if ("None" %in% input$filterByExpo || length(input$filterByExpo) == 0) {
+        unique(full_demo_dat$id)  # Include all IDs if "All" is selected or no options are selected
+      } else {
+        unique(
+          mil_expo_dat %>%
+            filter(exposureName %in% input$filterByExpo & exposureYesNo == 1) %>%
+            pull(id)
+        )
+      }
       
       age_gender_filtered <- full_demo_dat %>%
         filter(
@@ -169,7 +190,14 @@ ptHealthSxServer <- function(id, selected_patient) {
         )
       
       final_filtered <- ethnicity_race_filtered %>%
-        filter(id %in% conflict_filtered_ids)
+        filter(id %in% conflict_filtered_ids) %>%
+        filter(id %in% exposure_filtered_ids)
+      
+      observe({
+        print(conflict_filtered_ids)
+        print("expo filtered ids: ", exposure_filtered_ids)
+        print(input$filterByExpo)
+      })
       
       unique(final_filtered$id)
     }) %>% bindCache(
@@ -177,7 +205,8 @@ ptHealthSxServer <- function(id, selected_patient) {
       input$genderHealthSx,
       input$milConflictCodePtCardHealthSx,
       input$ethnicityHealthSx,
-      input$raceHealthSx
+      input$raceHealthSx,
+      input$filterByExpo
     )
     
     filtered_health_sx_dat <- reactive({
@@ -186,6 +215,7 @@ ptHealthSxServer <- function(id, selected_patient) {
         filter(id %in% filtered_ids_health_sx())
       
       data
+      
     }) %>% bindCache(filtered_ids_health_sx())
     
     # Calculate summary statistics for the group ----

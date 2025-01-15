@@ -46,6 +46,8 @@ civilian_expo_dat <- vroom("civilianExposuresDat.csv")
 # Used in ptHealthSx.R
 joined_everDxDat_healthSxDat <- vroom("joinedEverDxDatHealthSxDat.csv")
 
+#test <- joined_everDxDat_healthSxDat %>% filter(healthSxNames == "Difficulty Sleeping") %>% skimr::skim()
+
 # Used in ptSelfReport.R
 combined_selfreport_measures_dat <- vroom("combinedSelfReportMeasuresDat.csv") %>%
   filter(age < 105 & age > 15)

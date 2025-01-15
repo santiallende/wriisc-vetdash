@@ -30,12 +30,15 @@ ptSelfReportUI <- function(id) {
                 "Kosovo",
                 "Lebanon",
                 "ODSS",
-                "OIF/OEF/OND",
+                "OIF",
+                "OEF",
+                "OND",
                 "Other",
                 "Somalia",
                 "Vietnam",
                 "WWII"
               ),
+              multiple = TRUE,
               selected = "All"
             )
           ),
@@ -57,7 +60,7 @@ ptSelfReportUI <- function(id) {
     ),
     fluidRow(
       box(
-        title = "Filter by Gender, Ethnicity, and Race",
+        title = "Filter by Birth Sex, Ethnicity, and Race",
         width = 12,
         collapsible = TRUE,
         solidHeader = TRUE,
@@ -66,7 +69,7 @@ ptSelfReportUI <- function(id) {
             4,
             selectInput(
               ns("genderPtCard"),
-              "Gender:",
+              "Birth Sex:",
               choices = c("All", unique(combined_selfreport_measures_dat$gender)),
               selected = "All"
             )
@@ -222,16 +225,15 @@ ptSelfReportServer <- function(id, selected_patient) {
       )
       
       ## Filter IDs based on milConflictCode using mil_conflict_dat 
-      conflict_filtered_ids <-
-        if (input$milConflictCodePtCard == "All") {
-          unique(full_demo_dat$id)  # Include all IDs if no conflict filter is applied
-        } else {
-          unique(
-            mil_conflict_dat %>%
-              filter(milConflictCode == input$milConflictCodePtCard) %>%
-              pull(id)
-          )
-        }
+      conflict_filtered_ids <- if ("All" %in% input$milConflictCodePtCard || length(input$milConflictCodePtCard) == 0) {
+        unique(full_demo_dat$id)  # Include all IDs if "All" is selected or no options are selected
+      } else {
+        unique(
+          mil_conflict_dat %>%
+            filter(milConflictCode %in% input$milConflictCodePtCard) %>%
+            pull(id)
+        )
+      }
       
       ## Filter combined_selfreport_measures_dat based on age, gender, conflict_filtered_ids, race, and ethnicity 
       df <- combined_selfreport_measures_dat %>%
@@ -305,7 +307,7 @@ ptSelfReportServer <- function(id, selected_patient) {
         group_by(srMeasures) %>%
         summarise(
           mean = round(mean(srScores, na.rm = TRUE), 2),
-          sd = sd(srScores, na.rm = TRUE),
+          sd = round(sd(srScores, na.rm = TRUE), 2),
           median = round(median(srScores, na.rm = TRUE), 2),
           n = sum(!is.na(srScores)),
           z_median = round((median - mean) / sd, 2)
@@ -395,6 +397,8 @@ ptSelfReportServer <- function(id, selected_patient) {
             ptZScore,
             "<br><b>Mean:</b> ",
             mean,
+            "<br><b><i>sd =</i></b> ",
+            sd,
             "<br><b>Median:</b> ",
             median,
             "<br><b>Z-Score Median:</b> ",

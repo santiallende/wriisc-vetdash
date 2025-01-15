@@ -11,7 +11,7 @@ ptExposuresUI <- function(id) {
               fluidRow(
                 column(
                   6,
-                  selectInput(
+                  selectizeInput(
                     ns("milConflictCodeExpoTbl"),
                     div(
                       style = "display: flex; align-items: center;",
@@ -30,12 +30,15 @@ ptExposuresUI <- function(id) {
                       "Kosovo",
                       "Lebanon",
                       "ODSS",
-                      "OIF/OEF/OND",
+                      "OEF",
+                      "OIF",
+                      "OND",
                       "Other",
                       "Somalia",
                       "Vietnam",
                       "WWII"
                     ),
+                    multiple = TRUE,
                     selected = "All"
                   )
                 ),
@@ -55,7 +58,7 @@ ptExposuresUI <- function(id) {
               )
             ),
             box(
-              title = "Filter Military Exposures Table by Gender, Ethnicity, and Race",
+              title = "Filter Military Exposures Table by Birth Sex, Ethnicity, and Race",
               collapsible = TRUE,
               collapsed = FALSE,
               solidHeader = TRUE,
@@ -65,7 +68,7 @@ ptExposuresUI <- function(id) {
                   4,
                   selectInput(
                     ns("genderExpoTbl"),
-                    "Gender:",
+                    "Birth Sex:",
                     choices = c("All", "Male", "Female"),
                     selected = "All"
                   )
@@ -147,12 +150,12 @@ ptExposuresServer <- function(id, selected_patient) {
       )
       
       ## Get relevant IDs from mil_conflict_dat based on the selected milConflictCode ----
-      conflict_filtered_ids <- if (input$milConflictCodeExpoTbl == "All") {
-        unique(full_demo_dat$id)  # Include all IDs if no conflict filter is applied
+      conflict_filtered_ids <- if ("All" %in% input$milConflictCodeExpoTbl || length(input$milConflictCodeExpoTbl) == 0) {
+        unique(full_demo_dat$id)  # Include all IDs if "All" is selected or no options are selected
       } else {
         unique(
           mil_conflict_dat %>%
-            filter(milConflictCode == input$milConflictCodeExpoTbl) %>%
+            filter(milConflictCode %in% input$milConflictCodeExpoTbl) %>%
             pull(id)
         )
       }
@@ -492,7 +495,7 @@ ptExposuresServer <- function(id, selected_patient) {
             )
           ),
           conditional_percentile_rank_intensity = colDef(
-            name = "Conditional Intensity Percentile",
+            name = "Intensity Percentile",
             headerStyle = list(fontWeight = "bold"),
             align = "left",
             minWidth = 70,
@@ -504,7 +507,7 @@ ptExposuresServer <- function(id, selected_patient) {
             )
           ),
           conditional_percentile_rank_concern = colDef(
-            name = "Conditional Concern Percentile",
+            name = "Concern Percentile",
             headerStyle = list(fontWeight = "bold"),
             align = "left",
             minWidth = 70,

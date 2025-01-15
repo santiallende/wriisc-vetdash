@@ -239,7 +239,7 @@ ptCharacteristicsServer <- function(id, selected_patient) {
           paste0(
             "<div style='text-align:left; font-size:13px; font-weight:normal;'>",
             "<strong>Age:</strong> ", selected_patient$age, "<br>",
-            "<strong>Gender:</strong> ", selected_patient$gender, "<br>",
+            "<strong>Birth Sex:</strong> ", selected_patient$gender, "<br>",
             "<strong>Race:</strong> ", selected_patient$race, "<br>",
             "<strong>Ethnicity:</strong> ", selected_patient$ethnicity, "<br>",
             "<strong>Language(s):</strong> ", selected_patient$languages, "<br>",
@@ -1633,7 +1633,7 @@ ptCharacteristicsServer <- function(id, selected_patient) {
       }
       
       infoBox(
-        title = HTML("<div style='text-align:left; font-size:14px; font-weight:600;'>OtherExposures</div>"),
+        title = HTML("<div style='text-align:left; font-size:14px; font-weight:600;'>Other Exposures</div>"),
         value = HTML(paste0(
           "<div style='text-align:left; font-size:13px; font-weight:normal;'>", 
           exposures_info, "</div>"

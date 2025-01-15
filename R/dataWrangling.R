@@ -40,9 +40,9 @@
 #     milConflictCode == 9 ~ "Bosnia",
 #     milConflictCode == 10 ~ "Croatia",
 #     milConflictCode == 11 ~ "Somalia",
-#     milConflictCode == 12 ~ "OIF/OEF/OND",
-#     milConflictCode == 13 ~ "OIF/OEF/OND",
-#     milConflictCode == 14 ~ "OIF/OEF/OND",
+#     milConflictCode == 12 ~ "OEF",
+#     milConflictCode == 13 ~ "OIF",
+#     milConflictCode == 14 ~ "OND",
 #     milConflictCode == 15 ~ "Other"
 #   )) %>%
 #   select(id, milConflictCode) %>%
@@ -957,6 +957,12 @@
 #      # Need for sleep medicine
 #      psqi_meds_score = psqi_07,
 # 
+#      # Other disturbances
+#      psqi_05j_spec = str_remove_all(psqi_05j_spec, '^"+|"+$'),
+# 
+#      # Other Partner/Roommate Report
+#      psqi_10e_spec = str_remove_all(psqi_10e_spec, '^"+|"+$'),
+# 
 #      # Total PSQI score
 #      psqi_total = psqi_durat_score + psqi_distb_score + psqi_laten_score +
 #        psqi_daydys_score + psqi_hse_score + psqi_slpqual_score + psqi_meds_score
@@ -968,7 +974,8 @@
 #        psqi_total > 5 ~ "Poor",
 #        TRUE ~ "missing"
 #      )
-#    )
+#    ) %>%
+#    filter(!is.na(id))
 # 
 #  write_csv(psqiDat, "psqiDat.csv")
 # 
@@ -1516,7 +1523,7 @@
 # # Civilian Exposures Extras ----
 # extraCivilianExposuresDat <- intakeDat %>%
 #   select(id, expo_othc_spec, expo_othc, expo_othc_f, expo_othc_i,
-#          expo_othc_c, expo_resp, expo_resp_spec, expo_medi, 
+#          expo_othc_c, expo_resp, expo_resp_spec, expo_medi,
 #          expo_medi_spec, expo_work, expo_work_spec) %>%
 #   mutate(
 #     across(everything(), ~replace(., . %in% c(-99, 999, "-99", "999"), NA)),
@@ -1750,22 +1757,24 @@
 # 
 # ## Select vars of interest: PHQ-PD ----
 # phqPdDat <- intakeDat %>%
-#   select(id, phq_03a, phq_03b, phq_03c, phq_03d,
-#          phq_04) %>%
+#   select(id, phq_03a, phq_03b, phq_03c, phq_03d, phq_04) %>%
 #   pivot_longer(2:6, names_to = "phqPdItems", values_to = "phqPdItemScore") %>%
 #   group_by(id) %>%
 #   mutate(phqPdTotalScore = sum(phqPdItemScore)) %>%
-#   ungroup() %>%
 #   mutate(phqPdTotalScore = case_when(
-#     phqPdItems == "phq_03a" & phqPdItemScore  == FALSE ~ 0,
+#     any(phqPdItems == "phq_03a" & phqPdItemScore == FALSE) ~ 0,
 #     TRUE ~ phqPdTotalScore
-#   ),
-#   phqPdCutoffs = case_when(
+#   )) %>%
+#   ungroup() %>%
+#   mutate(phqPdCutoffs = case_when(
 #     phqPdTotalScore == 0 ~ "Pt Denied Pd Sx",
 #     phqPdTotalScore > 0 & phqPdTotalScore < 5 ~ "Subclinical PD",
 #     phqPdTotalScore == 5 ~ "Probable PD",
 #     TRUE ~ NA_character_
 #   )) %>%
+#   group_by(id) %>%
+#   filter(!any(is.na(phqPdItemScore))) %>%
+#   ungroup() %>%
 #   select(id, phqPdTotalScore) %>%
 #   distinct()
 # 
