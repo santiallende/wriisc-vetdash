@@ -118,20 +118,20 @@ ptExposuresUI <- function(id) {
                 solidHeader = TRUE,
                 reactableOutput(
                   ns("militaryExposuresTable"))
-            ),
-            tabPanel(
-              title = HTML("<strong>Civilian Exposures Table</strong>"),
-              width = 12,
-              collapsible = TRUE,
-              collapsed = FALSE,
-              solidHeader = TRUE,
-              reactableOutput(
-                ns("civilianExposuresTable"))
+              ),
+              tabPanel(
+                title = HTML("<strong>Civilian Exposures Table</strong>"),
+                width = 12,
+                collapsible = TRUE,
+                collapsed = FALSE,
+                solidHeader = TRUE,
+                reactableOutput(
+                  ns("civilianExposuresTable"))
+              )
             )
+            
           )
-        
-        )
-    )
+  )
 }
 
 ptExposuresServer <- function(id, selected_patient) {
@@ -419,7 +419,7 @@ ptExposuresServer <- function(id, selected_patient) {
           ))
         ))
       }
-        
+      
       # Render reactable table
       reactable(
         filtered_data,

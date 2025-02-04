@@ -38,8 +38,8 @@ window.onload = function() {
 
 # Define credentials
 credentials <- data.frame(
-  user = c("user"),
-  password = c("pwd"),
+  user = c("fishbowl"),
+  password = c("wr11$cP@k"),
   stringsAsFactors = FALSE
 )
 
